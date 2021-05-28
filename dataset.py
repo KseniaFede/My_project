@@ -5,9 +5,8 @@ from torch.utils.data import Dataset
 import torch
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import StandardScaler
-import logging
 
-logging.basicConfig(level=logging.DEBUG, format="%(acstime)s %(processName)-10s %(name)s: %(message)s")
+
 
 
 # In[2]:
@@ -38,17 +37,9 @@ class Circles(Dataset):
 
 if __name__ == "__main__":
     circles = Circles(n_samples=5000, shuffle=True, noise=0.1, random_state=0, factor=0.5)
-    # print(circles.X)
-    # print(circles.y)
-    logging.info(f'element 0{circles[0]}')
-    logging.debug(f"element 10{circles[10]}")
-    logging.debug(f'len(circles):{len(circles)}')
-
     print(len(circles))
     circles.plot_data()
 
-
-# In[19]:
 
 
 class Circles(Dataset):

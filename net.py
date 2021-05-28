@@ -1,18 +1,21 @@
-#architecture net
+
 
 import torch
 from torch import nn
+
+
 class SimpleMLP(nn.Module):
-        def __init__(self,layers_list):
-            super(SimpleMLP,self).__init__()
-            layers = []
-            for t in layers_list:
-                layers.append(nn.Linear(t[0],  t[1]))
-                layers.append(nn.Sigmoid())
-            layers.append(nn.Softmax())
-            self.net = nn.Sequential(*layers)
-        def forward(self,x):
-            return self.net(x)
+    def __init__(self, layers_list):
+        super(SimpleMLP, self).__init__()
+        layers = []
+        for t in layers_list:
+            layers.append(nn.Linear(t[0],  t[1]))
+            layers.append(nn.Sigmoid())
+        layers.append(nn.Softmax())
+        self.net = nn.Sequential(*layers)
+
+    def forward(self, x):
+        return self.net(x)
 
 
 if __name__ == "__main__":
