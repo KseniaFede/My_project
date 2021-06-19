@@ -12,12 +12,13 @@ from visualize_utils import make_meshgrid, predict_proba_on_mesh, plot_predictio
 
 from torch.utils.tensorboard import SummaryWriter
 
+
 class Trainer:
-    def __init__(self, model, lr, optimazer=None, criterion=None):
+    def __init__(self, model, lr, optimmizer=None, criterion=None):
         self.model = model
         self.criterion = CrossEntropyLoss()
 
-        self.optimizer = optim.Adam(self.model.parametrs(), lr=lr)
+        self.optimizer = optim.Adam(self.model.parameters(), lr=lr)
 
         cuda = torch.cuda.is_available()
         self.device = torch.device("cuda:0" if cuda else "cpu")
@@ -41,6 +42,20 @@ class Trainer:
                 loss.backward()
                 self.optimizer.step()
                 epoch_loss += loss.item()
+
+                if (epoch == 0 ) and (i<10):
+                    print("save image", epoch, i)
+
+                    train_dataset = train_dataloader.dataset
+                    X_train, X_test, y_train, y_test = get_data_from_datasets(train_dataset, train_dataset)
+
+                    xx, yy = make_meshgrid(X_train, X_test)
+
+                    Z = predict_proba_on_mesh_tensor(self, xx, yy)
+                    plot_predictions(xx, yy, Z, X_train=X_train, X_test=X_test,
+                                     y_train=y_train, y_test=y_test, plot_name=f"nn_prediction.png")
+
+                
             print(epoch_loss / len(train_dataloader))
             self.writer.add_scalar("training loss on epoch end", epoch_loss)
 
@@ -69,15 +84,15 @@ class Trainer:
             output = self.model(T)
         return output
 
+
 def get_data_from_datasets(train_dataset, test_dataset):
     X_train = train_dataset.X.astype(np.float32)
     X_test = test_dataset.X.astype(np.float32)
     y_train = train_dataset.y.astype(np.int)
     y_test = test_dataset.y.astype(np.int)
-    return X_train,X_test,y_train, y_test
+    return X_train, X_test, y_train, y_test
 
 
-#mesh сетка для каждой сетки берем точку и для точки делаем предсказание вероятности
 def predict_proba_on_mesh_tensor(clf, xx, yy):
     q = torch.Tensor(np.c_[xx.ravel(), yy.ravel()])
     print(q)
@@ -94,8 +109,8 @@ if __name__ == "__main__":
     trainer = Trainer(model, lr=0.1)
     print(trainer.device)
 
-    train_dataset = Circles(n_samples=5000, shuffle=True, noise=-0.1, random_state=0, factor=.5)
-    test_dataset = Circles(n_samples=1000, shuffle=True, noise=-0.1, random_state=0, factor=.5)
+    train_dataset = Circles(n_samples=5000, shuffle=True, noise=0.3, random_state=0, factor=.5)
+    test_dataset = Circles(n_samples=250, shuffle=True, noise=0.3, random_state=0, factor=.5)
 
     train_dataloader = DataLoader(train_dataset, batch_size=50, shuffle=False)
     test_dataloader = DataLoader(test_dataset, batch_size=50, shuffle=False)
@@ -110,5 +125,3 @@ if __name__ == "__main__":
 
     Z = predict_proba_on_mesh_tensor(trainer, xx, yy)
     plot_predictions(xx, yy, Z, X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
-    #plot_predictions()
-    #plot_predictions(xx, yy, Z, X_train=X_train, X_test=X_test, y_train=y_train, y_test=y_test)
